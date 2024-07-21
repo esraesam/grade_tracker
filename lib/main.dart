@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:grade_tracker/ViewModel/PdfViewModel.dart';
+import 'package:grade_tracker/test.dart';
 import 'package:provider/provider.dart';
 import 'package:grade_tracker/Utils/navigation_screen.dart';
 
@@ -28,7 +29,7 @@ class MyApp extends StatelessWidget {
         fontFamily: 'Inter',
       ),
       home:
-          NavigationScreen(), // Or any other initial screen you want to display
+          PDFUploaderPage(), // Or any other initial screen you want to display
     );
   }
 }
