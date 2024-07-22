@@ -1,8 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:grade_tracker/View/pdf_uploader_page.dart';
 import 'package:grade_tracker/ViewModel/StudentSearchViewModel.dart';
 import 'package:grade_tracker/ViewModel/pdf_uploader_viewmodel.dart';
-import 'package:grade_tracker/test.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -36,7 +36,8 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         fontFamily: 'Inter',
       ),
-      home: PDFUploaderPage(), // Set the initial screen to PDFUploaderPage
+      home:
+          const PDFUploaderPage(), // Set the initial screen to PDFUploaderPage
     );
   }
 }

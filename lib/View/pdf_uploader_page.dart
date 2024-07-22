@@ -1,9 +1,9 @@
 // views/pdf_uploader_page.dart
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:grade_tracker/Utils/constants.dart';
 import 'package:grade_tracker/View/StudentSearchPage.dart';
 import 'package:grade_tracker/ViewModel/pdf_uploader_viewmodel.dart';
-import 'package:grade_tracker/studentSearchPage.dart';
 import 'package:provider/provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -38,9 +38,7 @@ class PDFUploaderPage extends StatelessWidget {
             height: height * 0.06,
             width: width * 0.4,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(5),
-              color: Colors.blue,
-            ),
+                borderRadius: BorderRadius.circular(5), color: primaryColor),
             child: const Center(
               child: Text(
                 'Search Pdfs',

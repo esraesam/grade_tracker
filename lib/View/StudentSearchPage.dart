@@ -9,7 +9,14 @@ class StudentSearchPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Student Search'),
+        title: const Text(
+          'Student Search',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Colors.black,
+          ),
+        ),
       ),
       body: Column(
         children: [
@@ -17,9 +24,28 @@ class StudentSearchPage extends StatelessWidget {
             padding: const EdgeInsets.all(8.0),
             child: TextField(
               onChanged: (query) => viewModel.searchStudents(query),
-              decoration: const InputDecoration(
-                labelText: 'Search Students By Name',
-                suffixIcon: Icon(Icons.search),
+              decoration: InputDecoration(
+                contentPadding: const EdgeInsets.all(0),
+                filled: true,
+                fillColor: const Color.fromARGB(255, 240, 240, 241),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide.none,
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide.none,
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                hintText: "Search by name",
+                hintStyle: const TextStyle(
+                  fontSize: 13,
+                  color: Color(0xFF9F9A9A),
+                ),
+                prefixIcon: const Icon(
+                  Icons.search,
+                  size: 20,
+                  color: Color(0xFF9F9A9A),
+                ),
               ),
             ),
           ),
@@ -36,9 +62,7 @@ class StudentSearchPage extends StatelessWidget {
                               result['name'], viewModel.currentQuery),
                         ),
                         subtitle: Text(result['file_name']),
-                        onTap: () {
-                          // TODO: Implement PDF opening logic
-                        },
+                        onTap: () {},
                       );
                     },
                   ),
