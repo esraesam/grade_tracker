@@ -1,16 +1,24 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:grade_tracker/ViewModel/PdfViewModel.dart';
+import 'package:grade_tracker/ViewModel/StudentSearchViewModel.dart';
+import 'package:grade_tracker/ViewModel/pdf_uploader_viewmodel.dart';
 import 'package:grade_tracker/test.dart';
 import 'package:provider/provider.dart';
-import 'package:grade_tracker/Utils/navigation_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => UploadPdfViewModel(), // Provide your ViewModel here
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) =>
+              StudentSearchViewModel(), // Provide your ViewModel here
+        ),
+        ChangeNotifierProvider(
+          create: (_) => PDFUploaderViewModel(), // Provide your ViewModel here
+        ),
+      ],
       child: const MyApp(),
     ),
   );
@@ -28,8 +36,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         fontFamily: 'Inter',
       ),
-      home:
-          PDFUploaderPage(), // Or any other initial screen you want to display
+      home: PDFUploaderPage(), // Set the initial screen to PDFUploaderPage
     );
   }
 }

@@ -164,7 +164,7 @@ class _PDFUploaderPageState extends State<PDFUploaderPage> {
       floatingActionButton: InkWell(
         onTap: () {
           Navigator.push(
-              context, MaterialPageRoute(builder: (_) => StudentSearchPage()));
+              context, MaterialPageRoute(builder: (_) => StudentSearchPage1()));
         },
         child: Container(
           height: height * 0.06,

@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-class StudentSearchPage extends StatefulWidget {
+class StudentSearchPage1 extends StatefulWidget {
   @override
-  _StudentSearchPageState createState() => _StudentSearchPageState();
+  _StudentSearchPage1State createState() => _StudentSearchPage1State();
 }
 
-class _StudentSearchPageState extends State<StudentSearchPage> {
+class _StudentSearchPage1State extends State<StudentSearchPage1> {
   List<Map<String, dynamic>> _searchResults = [];
   bool _isSearching = false;
   String _currentQuery = '';
