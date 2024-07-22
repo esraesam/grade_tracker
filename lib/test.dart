@@ -46,36 +46,71 @@ class _PDFUploaderPageState extends State<PDFUploaderPage> {
 
         if (file.path != null) {
           String fileName = file.name;
+          Reference fileRef = FirebaseStorage.instance.ref('pdfs/$fileName');
 
-          // Upload file to Firebase Storage
-          await FirebaseStorage.instance
-              .ref('pdfs/$fileName')
-              .putFile(File(file.path!));
+          String downloadURL;
 
-          String downloadURL = await FirebaseStorage.instance
-              .ref('pdfs/$fileName')
-              .getDownloadURL();
+          try {
+            // Upload file to Firebase Storage
+            await fileRef.putFile(File(file.path!));
+            downloadURL = await fileRef.getDownloadURL();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('PDF uploaded successfully. Indexing...')),
+            );
+          } catch (e) {
+            print('Error uploading file: $e');
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error uploading file: ${e.toString()}')),
+            );
+            return;
+          }
 
           // Index PDF
-          final response = await http.post(
-            Uri.parse('http://10.0.2.2:8000/process_pdf.php'),
-            body: {'pdfUrl': downloadURL, 'fileName': fileName},
-          );
-
-          if (response.statusCode == 200) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('PDF uploaded and indexed successfully')),
+          try {
+            final response = await http.post(
+              Uri.parse('http://10.0.2.2:8000/process_pdf.php'),
+              body: {'pdfUrl': downloadURL, 'fileName': fileName},
             );
-            // Refresh the list of indexed files
-            await _fetchIndexedFiles();
-          } else {
-            throw Exception('Failed to index PDF: ${response.statusCode}');
+
+            print('Raw server response: ${response.body}'); // Log raw response
+
+            if (response.statusCode == 200) {
+              Map<String, dynamic> result = json.decode(response.body);
+
+              print('Parsed server response: $result'); // Log parsed response
+
+              if (result['status'] == 'success') {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('PDF indexed successfully')),
+                );
+              } else if (result['status'] == 'already_indexed') {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('This PDF was already indexed')),
+                );
+              } else if (result['status'] == 'error') {
+                throw Exception(result['message']);
+              } else {
+                throw Exception('Unexpected server response');
+              }
+              // Refresh the list of indexed files
+              await _fetchIndexedFiles();
+            } else {
+              throw Exception(
+                  'Server responded with status code: ${response.statusCode}');
+            }
+          } catch (e) {
+            print('Error during indexing: $e');
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error during indexing: ${e.toString()}')),
+            );
           }
         }
       }
     } catch (e) {
+      print('Unexpected error in _uploadAndIndexPDF: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
+        SnackBar(
+            content: Text('An unexpected error occurred: ${e.toString()}')),
       );
     } finally {
       setState(() {

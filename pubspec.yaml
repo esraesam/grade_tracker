@@ -54,6 +54,7 @@ dependencies:
   cloud_firestore: ^4.15.8
   elastic_client: ^0.3.13
   http_parser: ^4.0.2
+  flutter_html: ^3.0.0-beta.2
   
 
 dev_dependencies:

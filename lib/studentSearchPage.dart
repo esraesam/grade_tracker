@@ -10,30 +10,38 @@ class StudentSearchPage extends StatefulWidget {
 class _StudentSearchPageState extends State<StudentSearchPage> {
   List<Map<String, dynamic>> _searchResults = [];
   bool _isSearching = false;
+  String _currentQuery = '';
 
   Future<void> _searchStudents(String query) async {
-    if (query.length < 3) return;
+    if (query.length < 2) {
+      setState(() {
+        _searchResults = [];
+        _currentQuery = '';
+      });
+      return;
+    }
 
     setState(() {
       _isSearching = true;
+      _currentQuery = query;
     });
 
     try {
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:8000/search_students.php?query=$query'),
+        Uri.parse(
+            'http://10.0.2.2:8000/search_students.php?query=${Uri.encodeComponent(query)}'),
       );
-      print('response ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        print('data $data');
         setState(() {
           _searchResults = List<Map<String, dynamic>>.from(data['results']);
         });
       } else {
-        throw Exception('Failed to search students');
+        throw Exception('Failed to search students: ${response.statusCode}');
       }
     } catch (e) {
+      print('Error searching students: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error searching students: $e')),
       );
@@ -42,6 +50,39 @@ class _StudentSearchPageState extends State<StudentSearchPage> {
         _isSearching = false;
       });
     }
+  }
+
+  Widget _buildHighlightedName(String name, String query) {
+    if (query.isEmpty) return Text(name);
+
+    List<TextSpan> spans = [];
+    int start = 0;
+    int indexOfQuery;
+
+    while ((indexOfQuery =
+            name.toLowerCase().indexOf(query.toLowerCase(), start)) !=
+        -1) {
+      if (indexOfQuery > start) {
+        spans.add(TextSpan(text: name.substring(start, indexOfQuery)));
+      }
+      spans.add(TextSpan(
+        text: name.substring(indexOfQuery, indexOfQuery + query.length),
+        style: TextStyle(
+            backgroundColor: Colors.yellow, fontWeight: FontWeight.bold),
+      ));
+      start = indexOfQuery + query.length;
+    }
+
+    if (start < name.length) {
+      spans.add(TextSpan(text: name.substring(start)));
+    }
+
+    return RichText(
+      text: TextSpan(
+        style: TextStyle(fontSize: 16, color: Colors.black),
+        children: spans,
+      ),
+    );
   }
 
   @override
@@ -56,32 +97,25 @@ class _StudentSearchPageState extends State<StudentSearchPage> {
             padding: const EdgeInsets.all(8.0),
             child: TextField(
               onChanged: _searchStudents,
-              decoration: InputDecoration(
-                labelText: 'Search Students',
+              decoration: const InputDecoration(
+                labelText: 'Search Students By Name',
                 suffixIcon: Icon(Icons.search),
               ),
             ),
           ),
           Expanded(
             child: _isSearching
-                ? Center(child: CircularProgressIndicator())
+                ? const Center(child: CircularProgressIndicator())
                 : ListView.builder(
                     itemCount: _searchResults.length,
                     itemBuilder: (context, index) {
                       final result = _searchResults[index];
                       return ListTile(
-                        title: RichText(
-                          text: TextSpan(
-                            children: _highlightOccurrences(
-                              result['name'],
-                              result['highlighted_name'],
-                            ),
-                            style: DefaultTextStyle.of(context).style,
-                          ),
-                        ),
+                        title: _buildHighlightedName(
+                            result['name'], _currentQuery),
                         subtitle: Text(result['file_name']),
                         onTap: () {
-                          // Open PDF file using result['file_url']
+                          // TODO: Implement PDF opening logic
                         },
                       );
                     },
@@ -90,30 +124,5 @@ class _StudentSearchPageState extends State<StudentSearchPage> {
         ],
       ),
     );
-  }
-
-  List<TextSpan> _highlightOccurrences(String text, String highlighted) {
-    final List<TextSpan> spans = [];
-    int start = 0;
-    int indexOfHighlight;
-
-    while ((indexOfHighlight = text.indexOf(highlighted, start)) != -1) {
-      if (indexOfHighlight > start) {
-        spans.add(TextSpan(text: text.substring(start, indexOfHighlight)));
-      }
-      spans.add(TextSpan(
-        text: text.substring(
-            indexOfHighlight, indexOfHighlight + highlighted.length),
-        style: TextStyle(
-            fontWeight: FontWeight.bold, backgroundColor: Colors.yellow),
-      ));
-      start = indexOfHighlight + highlighted.length;
-    }
-
-    if (start < text.length) {
-      spans.add(TextSpan(text: text.substring(start)));
-    }
-
-    return spans;
   }
 }
