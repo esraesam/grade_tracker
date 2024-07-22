@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:grade_tracker/Model/pdfFile.dart';
-import 'package:grade_tracker/View/Navigation%20Screens/Home%20Screens/pdf_viewer_screen.dart';
 import 'package:grade_tracker/widgets/Home/search_textFormField_widget.dart';
 
 class DisplayPdfScreen extends StatefulWidget {
@@ -106,13 +105,13 @@ class _DisplayPdfScreenState extends State<DisplayPdfScreen> {
                         PDFFile pdfFile = snapshot.data![index];
                         return GestureDetector(
                           onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => PDFViewerPage(
-                                    pdfFile: pdfFile), // Pass PDFFile object
-                              ),
-                            );
+                            // Navigator.push(
+                            //   context,
+                            //   MaterialPageRoute(
+                            //     builder: (context) => PDFViewerPage(
+                            //         pdfFile: pdfFile), // Pass PDFFile object
+                            //   ),
+                            // );
                           },
                           child: Container(
                             height: height * 0.1,

@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:grade_tracker/Utils/constants.dart';
 import 'package:grade_tracker/studentSearchPage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -156,37 +158,173 @@ class _PDFUploaderPageState extends State<PDFUploaderPage> {
 
   @override
   Widget build(BuildContext context) {
+    var height = MediaQuery.of(context).size.height;
+    var width = MediaQuery.of(context).size.width;
     return Scaffold(
-      floatingActionButton: TextButton(
-        child: Text('Search'),
-        onPressed: () {
+      floatingActionButton: InkWell(
+        onTap: () {
           Navigator.push(
               context, MaterialPageRoute(builder: (_) => StudentSearchPage()));
         },
+        child: Container(
+          height: height * 0.06,
+          width: width * 0.4,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(5),
+            color: primaryColor,
+          ),
+          child: const Center(
+            child: Text(
+              'Search Pdfs',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ),
       ),
-      appBar: AppBar(title: Text('PDF Uploader')),
+      appBar: AppBar(
+        title: const Text(
+          'Pdf Uploader',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: Colors.black,
+          ),
+        ),
+        elevation: 0,
+      ),
       body: Column(
         children: [
-          ElevatedButton(
-            onPressed: _isUploading ? null : _uploadAndIndexPDF,
-            child: Text(_isUploading ? 'Uploading...' : 'Upload PDF'),
+          Image.asset(
+            'assets/images/upload.png',
+            height: height * 0.1,
           ),
+          SizedBox(height: height * 0.02),
+          Container(
+            height: height * 0.051,
+            width: width * 0.7,
+            decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  offset: const Offset(3, 4),
+                  blurRadius: 6,
+                  spreadRadius: 6,
+                  color: Colors.grey.withOpacity(0.10),
+                ),
+              ],
+            ),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black,
+              ),
+              onPressed: _isUploading ? null : _uploadAndIndexPDF,
+              child: Text(_isUploading ? 'Uploading...' : 'Upload PDF',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                  )),
+            ),
+          ),
+          // ElevatedButton(
+          //   onPressed: _isUploading ? null : _uploadAndIndexPDF,
+          //   child: Text(_isUploading ? 'Uploading...' : 'Upload PDF'),
+          // ),
+          SizedBox(height: height * 0.02),
           Expanded(
-            child: ListView.builder(
-              itemCount: _indexedFiles.length,
-              itemBuilder: (context, index) {
-                final fileName =
-                    _indexedFiles[index]['file_name'] ?? 'Unnamed File';
-                final uploadDate =
-                    _indexedFiles[index]['upload_date'] ?? 'Unknown Date';
-                return ListTile(
-                  title: Text(
-                    decodeFileName(fileName),
-                    style: TextStyle(fontFamily: 'NotoSansArabic'),
-                  ),
-                  subtitle: Text(uploadDate),
-                );
-              },
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: width * 0.03),
+              child: ListView.builder(
+                itemCount: _indexedFiles.length,
+                itemBuilder: (context, index) {
+                  final fileName =
+                      _indexedFiles[index]['file_name'] ?? 'Unnamed File';
+                  final uploadDate =
+                      _indexedFiles[index]['upload_date'] ?? 'Unknown Date';
+                  return GestureDetector(
+                    onTap: () {
+                      // Navigator.push(
+                      //   context,
+                      //   MaterialPageRoute(
+                      //     builder: (context) => PDFViewerPage(
+                      //         pdfFile: pdfFile), // Pass PDFFile object
+                      //   ),
+                      // );
+                    },
+                    child: Container(
+                      height: height * 0.1,
+                      width: width,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        color: Colors.white,
+                      ),
+                      child: Row(
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.only(left: width * 0.02),
+                            child: Container(
+                              height: height * 0.08,
+                              width: width * 0.19,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                color: Colors.grey.shade200,
+                              ),
+                              child: Icon(
+                                FontAwesomeIcons.filePdf,
+                                color: Colors
+                                    .red, // Ensure this is defined somewhere
+                                size: height * 0.04,
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: width * 0.03),
+                          Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                SizedBox(
+                                  width: width * 0.38,
+                                  child: Text(
+                                    decodeFileName(fileName),
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.black,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: width * 0.38,
+                                  child: Text(
+                                    uploadDate,
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.grey.shade300,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+
+                  //  ListTile(
+                  //   title: Text(
+                  //     decodeFileName(fileName),
+                  //     style: TextStyle(fontFamily: 'NotoSansArabic'),
+                  //   ),
+                  //   subtitle: Text(uploadDate),
+                  // );
+                },
+              ),
             ),
           )
         ],
