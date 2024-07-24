@@ -1,8 +1,7 @@
-// viewmodels/pdf_uploader_viewmodel.dart
 import 'dart:convert';
 import 'dart:io';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:grade_tracker/Model/pdf_file.dart';
 import 'package:http/http.dart' as http;
@@ -16,6 +15,11 @@ class PDFUploaderViewModel extends ChangeNotifier {
 
   void setUploading(bool uploading) {
     _isUploading = uploading;
+    notifyListeners();
+  }
+
+  void addIndexedFile(PDFFile file) {
+    _indexedFiles.add(file);
     notifyListeners();
   }
 
@@ -49,6 +53,7 @@ class PDFUploaderViewModel extends ChangeNotifier {
     setUploading(true);
 
     try {
+      print("Starting file picker");
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['pdf'],
@@ -56,6 +61,7 @@ class PDFUploaderViewModel extends ChangeNotifier {
 
       if (result != null && result.files.isNotEmpty) {
         PlatformFile file = result.files.first;
+        print("File selected: ${file.name}");
 
         if (file.path != null) {
           String fileName = file.name;
@@ -63,13 +69,15 @@ class PDFUploaderViewModel extends ChangeNotifier {
           String downloadURL;
 
           try {
+            print("Uploading file to Firebase Storage");
             await fileRef.putFile(File(file.path!));
             downloadURL = await fileRef.getDownloadURL();
+            print('File uploaded to Firebase. Download URL: $downloadURL');
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('PDF uploaded successfully. Indexing...')),
             );
           } catch (e) {
-            print('Error uploading file: $e');
+            print('Error uploading file to Firebase: $e');
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('Error uploading file: ${e.toString()}')),
             );
@@ -77,28 +85,33 @@ class PDFUploaderViewModel extends ChangeNotifier {
           }
 
           try {
+            print('Sending request to index PDF...');
             final response = await http.post(
               Uri.parse('http://10.0.2.2:8000/process_pdf.php'),
               body: {'pdfUrl': downloadURL, 'fileName': fileName},
             );
 
+            print(
+                'Received response from server. Status code: ${response.statusCode}');
+            print('Response body: ${response.body}');
+
             if (response.statusCode == 200) {
               Map<String, dynamic> result = json.decode(response.body);
 
               if (result['status'] == 'success') {
+                print('PDF indexed successfully');
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('PDF indexed successfully')),
                 );
-              } else if (result['status'] == 'already_indexed') {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('This PDF was already indexed')),
-                );
-              } else if (result['status'] == 'error') {
-                throw Exception(result['message']);
+
+                // Add the new file to the list
+                addIndexedFile(PDFFile(
+                  fileName: fileName,
+                  uploadDate: DateTime.now().toIso8601String(),
+                ));
               } else {
-                throw Exception('Unexpected server response');
+                throw Exception(result['message'] ?? 'Unknown error occurred');
               }
-              await fetchIndexedFiles();
             } else {
               throw Exception(
                   'Server responded with status code: ${response.statusCode}');
@@ -110,6 +123,8 @@ class PDFUploaderViewModel extends ChangeNotifier {
             );
           }
         }
+      } else {
+        print("No file selected");
       }
     } catch (e) {
       print('Unexpected error in uploadAndIndexPDF: $e');
